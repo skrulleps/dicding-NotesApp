@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script type="module" src="src/app.js" defer></script>
+ <link rel="stylesheet" href="src/styles/style.css">
+</head>
+<body>
+  <note-app>
+    <app-header slot="header">
+      <h1>Notes Website</h1>
+    </app-header>
+
+    <note-form slot="main">
+      <div class="form-group" slot="title">
+        <label for="title">Title</label>
+        <input type="text" id="title" placeholder="Note title" required>
+      </div>
+      <div class="form-group" slot="body">
+        <label for="body">Content</label>
+        <textarea id="body" placeholder="Write your note here..." required></textarea>
+      </div>
+      <div class="actions" slot="actions">
+        <button type="submit" class="btn">Save Note</button>
+        <button type="reset" class="btn btn-secondary">Clear</button>
+      </div>
+
+    </note-form>
+
+    <note-list slot="main" notes='[{"id":"notes-jT-jjsyz61J8XKiI","title":"Welcome to Notes, Dimas!","body":"Welcome to Notes! This is your first note. You can archive it, delete it, or create new ones.","createdAt":"2022-07-28T10:03:12.594Z","archived":false}]'>
+
+
+      <p slot="empty">No notes yet. Create your first note!</p>
+    </note-list>
+  </note-app>
+</body>
+</html>

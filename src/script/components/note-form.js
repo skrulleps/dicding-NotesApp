@@ -1,4 +1,5 @@
-import { addNote } from '../data/notes-data.js';
+// import { addNote } from '../data/local/notes-data.js';
+import { NoteApi } from '../data/remote/note-api.js';
 
 class NoteForm extends HTMLElement {
     constructor() {
@@ -12,7 +13,7 @@ class NoteForm extends HTMLElement {
     }
 
     render() {
-        this.shadowRoot.innerHTML = `
+        this.shadowRoot.innerHTML += `
             <style>
                 :host {
                     display: block;

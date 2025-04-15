@@ -1,91 +1,134 @@
 import Utils from '../utils.js';
-import NotesData from '../data/notes-data.js';
+import { NoteApi } from '../data/remote/note-api.js';
 
 const home = () => {
-  const searchFormElement = document.querySelector('.search-bar');
-  const noteListContainerElement = document.querySelector('#note-form');
-  const noteQueryWaitingElement = document.querySelector('query-waiting');
-  const noteLoadingElement = document.querySelector('search-loading');
-  const noteListElement = noteListContainerElement.querySelector('note-list');
-
-  const addNewNote = (newNote) => {
-      NotesData.addNote(newNote); // Add the new note to the data
-      displayResult(NotesData.notesData); // Update the displayed notes
-  };
-
-  const showNotes = (query) => {
-
-    showLoading();
-
-    const result = NotesData.searchNotes(query);
-    displayResult(result);
-
-    showNoteList();
-  };
-
-  const onSearchHandler = (event) => {
-    event.preventDefault();
-
-    const { query } = event.detail;
-    showNotes(query);
-  };
-
-  const displayResult = (notes) => {
-    const noteItemElements = notes.map((note) => {
-      const noteItemElement = document.createElement('note-item');
-      noteItemElement.note = note;
-
-      return noteItemElement;
-    });
-
-    Utils.emptyElement(noteListElement);
-    noteListElement.append(...noteItemElements);
-  };
-
-  const showNoteList = () => {
-    Array.from(noteListContainerElement.children).forEach((element) => {
-      Utils.hideElement(element);
-    });
-    Utils.showElement(noteListElement);
-  };
-
-  const showLoading = () => {
-    Array.from(noteListContainerElement.children).forEach((element) => {
-      Utils.hideElement(element);
-    });
-    Utils.showElement(noteLoadingElement);
-  };
-
-  const showQueryWaiting = () => {
-    Array.from(noteListContainerElement.children).forEach((element) => {
-      Utils.hideElement(element);
-    });
-    Utils.showElement(noteQueryWaitingElement);
-  };
-
-searchFormElement.addEventListener('search', onSearchHandler);
-const noteFormElement = document.querySelector('note-form');
-noteFormElement.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const title = noteFormElement.querySelector('#title').value;
-    const body = noteFormElement.querySelector('#body').value;
-
-    if (title && body) {
-        const newNote = {
-            id: `notes-${Math.random().toString(36).substr(2, 9)}`,
-            title,
-            body,
-            createdAt: new Date().toISOString(),
-            archived: false
-        };
-        addNewNote(newNote); // Call the function to add the new note
-        noteFormElement.reset(); // Reset the form
-    } else {
-        alert('Please fill in both title and content');
+  setTimeout(() => {
+    const noteAppElement = document.querySelector('note-app');
+    if (!noteAppElement) {
+      console.error('Note app element not found');
+      return;
     }
-});
 
-  showQueryWaiting();
+    const noteListElement = noteAppElement.querySelector('note-list');
+    const noteFormElement = noteAppElement.querySelector('note-form');
+    const archiveListElement = noteAppElement.querySelector('archive-list');
+    const showArchiveButton = noteFormElement.querySelector('#archive-button')
+    
+    
+
+    
+    if (!noteListElement || !noteFormElement) {
+      console.error('Required components not found');
+      return;
+    }
+
+    const addNewNote = async (newNote) => {
+      try {
+        showLoading();
+        const addedNote = await NoteApi.addNote({
+          title: newNote.title,
+          body: newNote.body
+        });
+        
+        if (!addedNote) {
+          throw new Error('Failed to add note - no data returned');
+        }
+        
+        const notes = await NoteApi.getNotes();
+        displayResult(notes);
+        alert('Catatan berhasil ditambahkan!');
+      } catch (error) {
+        console.error('Gagal menambahkan catatan:', error);
+        alert('Gagal menambahkan catatan: ' + error.message);
+        showQueryWaiting();
+      }
+    };
+
+    const showNotes = async () => {
+      try {
+        showLoading();
+        const notes = await NoteApi.getNotes();
+        const archivedNotes = await NoteApi.getArchivedNotes();
+        displayResult(notes);
+        // displayResult(archivedNotes);
+      } catch (error) {
+        console.error('Failed to load notes:', error);
+        alert('Failed to load notes');
+        showQueryWaiting();
+      }
+    };
+
+    const showArchivedNotes = async () => {
+      try {
+        const archivedNotes = await NoteApi.getArchivedNotes();
+        archiveListElement.setAttribute('notes', JSON.stringify(archivedNotes));
+      } catch (error) {
+        console.error('Failed to load archived notes:', error);
+      }
+    };
+
+    const displayResult = (notes) => {
+      noteListElement.setAttribute('notes', JSON.stringify(notes));
+    };
+
+    const showLoading = () => {
+      noteListElement.setAttribute('notes', JSON.stringify([]));
+    };
+
+    const showQueryWaiting = () => {
+      noteListElement.setAttribute('notes', JSON.stringify([]));
+    };
+
+    // Event listeners
+    noteFormElement.addEventListener('add-note', (event) => {
+      addNewNote(event.detail);
+    });
+
+    noteListElement.addEventListener('archive-note', async (e) => {
+      try {
+        await NoteApi.archiveNote(e.detail.noteId); 
+        await showNotes();       
+        await showArchivedNotes(); 
+        console.log('Notes after archiving:', noteListElement.getAttribute('notes'));
+        alert('Note archived successfully');
+      } catch (error) {
+        console.error('Failed to archive note:', error);
+        alert('Failed to archive note: ' + error.message);
+      }
+    });
+
+    showArchiveButton.addEventListener('click', async (e) => {
+      const archiveListElement = noteAppElement.querySelector('archive-list');
+      if (archiveListElement) {
+        if (archiveListElement.hasAttribute('hidden')) {
+          archiveListElement.removeAttribute('hidden');
+          showArchiveButton.textContent = 'Hide Archive'
+        } else {
+          archiveListElement.setAttribute('hidden', '');
+          showArchiveButton.textContent = 'Show Archive'
+        }
+      }
+    });
+    
+
+    archiveListElement.addEventListener('unarchive-note', async (e) => {
+      try {
+        await NoteApi.unarchiveNote(e.detail.noteId);
+        await showNotes();
+        await showArchivedNotes();
+        alert('Note unarchived successfully');
+      } catch (error) {
+        console.error('Failed to unarchive note:', error);
+        alert('Failed to unarchive note: ' + error.message);
+      }
+    });
+
+
+    // Initialize
+    showQueryWaiting();
+    showNotes();
+    showArchivedNotes();
+  });
 };
 
 export default home;

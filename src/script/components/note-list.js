@@ -1,7 +1,8 @@
-import {notesData} from "../data/notes-data.js"; 
+// import {notesData} from "../data/local/notes-data.js"; 
+import { NoteApi } from "../data/remote/note-api";
 
 class NoteList extends HTMLElement {
-  _notes = [...notesData]
+  _notes = [];
 
   constructor() {
     super();
@@ -20,12 +21,15 @@ class NoteList extends HTMLElement {
     }
   }
 
-    connectedCallback() {
-      this.notes = notesData; // Set the notes to the existing notesData
-
-
+  async connectedCallback() {
+    try {
+      this.notes = await NoteApi.getNotes();
       this.render();
-
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+      this.notes = [];
+      this.render();
+    }
   }
 
   render() {
@@ -55,7 +59,8 @@ class NoteList extends HTMLElement {
             note-title="${note.title.replace(/"/g, '"')}"
             note-body="${note.body.replace(/"/g, '"')}"
             created-at="${note.createdAt}"
-          ></note-item>
+          >
+          </note-item>
         `).join('')}
       `;
     }

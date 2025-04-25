@@ -1,8 +1,7 @@
-
-const BASE_URL = 'https://notes-api.dicoding.dev/v2';
+const BASE_URL = "https://notes-api.dicoding.dev/v2";
 
 export class NoteApi {
-  static showResponseMessage(message = 'Check your internet connection') {
+  static showResponseMessage(message = "Check your internet connection") {
     alert(message);
   }
 
@@ -24,15 +23,15 @@ export class NoteApi {
   static async addNote({ title, body }) {
     try {
       const response = await fetch(`${BASE_URL}/notes`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title, body })
+        body: JSON.stringify({ title, body }),
       });
-  
+
       const responseJson = await response.json();
-  
+
       if (responseJson.error) {
         NoteApi.showResponseMessage(responseJson.message);
       } else {
@@ -79,7 +78,7 @@ export class NoteApi {
   static async archiveNote(noteId) {
     try {
       const response = await fetch(`${BASE_URL}/notes/${noteId}/archive`, {
-        method: 'POST',
+        method: "POST",
       });
       const responseJson = await response.json();
 
@@ -91,32 +90,30 @@ export class NoteApi {
     } catch (error) {
       NoteApi.showResponseMessage(error.message);
     }
- } 
+  }
 
- static async unarchiveNote(noteId) {
-  try {
-    const response = await fetch(`${BASE_URL}/notes/${noteId}/unarchive`, {
-      method: 'POST'
-    });
-    const responseJson = await response.json();
+  static async unarchiveNote(noteId) {
+    try {
+      const response = await fetch(`${BASE_URL}/notes/${noteId}/unarchive`, {
+        method: "POST",
+      });
+      const responseJson = await response.json();
 
-    if (responseJson.error) {
-      NoteApi.showResponseMessage(responseJson.message);
-    } else {
-      return responseJson.message; // "Note unarchived"
-    }
-
+      if (responseJson.error) {
+        NoteApi.showResponseMessage(responseJson.message);
+      } else {
+        return responseJson.message; // "Note unarchived"
+      }
     } catch (error) {
       NoteApi.showResponseMessage(error.message);
     }
   }
- 
 
   // Menghapus note
   static async deleteNote(noteId) {
     try {
       const response = await fetch(`${BASE_URL}/notes/${noteId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       const responseJson = await response.json();
 

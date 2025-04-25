@@ -1,13 +1,30 @@
-import { NoteApi } from '../data/remote/note-api.js';
+import { NoteApi } from "../data/remote/note-api.js";
 
 class NoteItem extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   static get observedAttributes() {
-    return ['note-id', 'note-title', 'note-body', 'created-at'];
+    return ["note-id", "note-title", "note-body", "created-at"];
+  }
+
+  async loadNotes() {
+    try {
+      console.log("Fetching notes from API...");
+      const notes = await NoteApi.getNotes();
+      // console.log('Notes received:', notes);
+
+      if (Array.isArray(notes)) {
+        this.notes = notes;
+      } else {
+        throw new Error("Invalid notes data format");
+      }
+    } catch (error) {
+      console.error("Failed to load notes:", error);
+      this.notes = [];
+    }
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -18,88 +35,72 @@ class NoteItem extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    // this.loadNotes();
   }
 
   _addEventListeners() {
-    const archiveBtn = this.shadowRoot.querySelector('#archive');
-    const deleteBtn = this.shadowRoot.querySelector('#delete');
-    const editBtn = this.shadowRoot.querySelector('#edit');
-    const shareBtn = this.shadowRoot.querySelector('#share');
+    const archiveBtn = this.shadowRoot.querySelector("#archive");
+    const deleteBtn = this.shadowRoot.querySelector("#delete");
 
     if (archiveBtn) {
-      archiveBtn.addEventListener('click', async () => {
-        const noteId = this.getAttribute('note-id');
+      archiveBtn.addEventListener("click", async () => {
+        const noteId = this.getAttribute("note-id");
         try {
           const result = await NoteApi.archiveNote(noteId);
           if (result) {
-            this.dispatchEvent(new CustomEvent('archive-note', {
-              detail: { noteId },
-              bubbles: true,
-              composed: true
-            }));
-            alert('Note archived');
+            this.dispatchEvent(
+              new CustomEvent("archive-note", {
+                bubbles: true,
+                composed: true,
+                detail: { noteId: this.getAttribute("note-id") },
+              }),
+            );
+            alert("Note archived");
+            this.loadNotes();
             this.remove();
           } else {
-            alert('Failed to archive note');
+            alert("Failed to archive note");
           }
         } catch (err) {
-          console.error('Archive error:', err);
-          alert('Failed to archive note: ' + err.message);
+          console.error("Archive error:", err);
+          alert("Failed to archive note: " + err.message);
         }
       });
     }
 
     if (deleteBtn) {
-      deleteBtn.addEventListener('click', async () => {
-        const noteId = this.getAttribute('note-id');
+      deleteBtn.addEventListener("click", async () => {
+        const noteId = this.getAttribute("note-id");
         try {
           const result = await NoteApi.deleteNote(noteId);
           if (result) {
-            this.dispatchEvent(new CustomEvent('delete-note', {
-              detail: { noteId },
-              bubbles: true,
-              composed: true
-            }));
-            alert('Note deleted');
+            this.dispatchEvent(
+              new CustomEvent("delete-note", {
+                detail: { noteId },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+            alert("Note deleted");
             this.remove();
           } else {
-            alert('Failed to delete note');
+            alert("Failed to delete note");
           }
         } catch (err) {
-          console.error('Delete error:', err);
-          alert('Failed to delete note: ' + err.message);
+          console.error("Delete error:", err);
+          alert("Failed to delete note: " + err.message);
         }
-      });
-    }
-
-    if (editBtn) {
-      editBtn.addEventListener('click', () => {
-        const noteId = this.getAttribute('note-id');
-        this.dispatchEvent(new CustomEvent('edit-note', {
-          detail: { noteId },
-          bubbles: true,
-          composed: true
-        }));
-      });
-    }
-
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        const noteId = this.getAttribute('note-id');
-        this.dispatchEvent(new CustomEvent('share-note', {
-          detail: { noteId },
-          bubbles: true,
-          composed: true
-        }));
       });
     }
   }
 
   render() {
-    const noteId = this.getAttribute('note-id');
-    const title = this.getAttribute('note-title');
-    const body = this.getAttribute('note-body');
-    const createdAt = new Date(this.getAttribute('created-at')).toLocaleDateString();
+    const noteId = this.getAttribute("note-id");
+    const title = this.getAttribute("note-title");
+    const body = this.getAttribute("note-body");
+    const createdAt = new Date(
+      this.getAttribute("created-at"),
+    ).toLocaleDateString();
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -179,8 +180,6 @@ class NoteItem extends HTMLElement {
       <div class="date">Created: ${createdAt}</div>
       <div class="actions">
         <button class="note-action" id="archive">Archive</button>
-        <button class="note-action" id="edit">Edit</button>
-        <button class="note-action" id="share">Detail</button>
         <button class="note-action" id="delete">Delete</button>
       </div>
     `;
@@ -189,4 +188,4 @@ class NoteItem extends HTMLElement {
   }
 }
 
-customElements.define('note-item', NoteItem);
+customElements.define("note-item", NoteItem);

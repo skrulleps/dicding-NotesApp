@@ -1,16 +1,15 @@
 export class AppHeader extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-    }
+  connectedCallback() {
+    this.render();
+  }
 
-    connectedCallback() {
-      this.render();
-    }
-
-    render() {
-      this.shadowRoot.innerHTML = `
+  render() {
+    this.shadowRoot.innerHTML = `
         <style>
           h1 {
             font-size: 1.8rem;
@@ -19,7 +18,7 @@ export class AppHeader extends HTMLElement {
         </style>
         <slot></slot>
       `;
-    }
   }
+}
 
-  customElements.define('app-header', AppHeader);
+customElements.define("app-header", AppHeader);

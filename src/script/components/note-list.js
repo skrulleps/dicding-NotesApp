@@ -1,4 +1,4 @@
-// import {notesData} from "../data/local/notes-data.js"; 
+// import {notesData} from "../data/local/notes-data.js";
 import { NoteApi } from "../data/remote/note-api";
 
 class NoteList extends HTMLElement {
@@ -6,16 +6,16 @@ class NoteList extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
     this.notes = this._notes;
   }
 
   static get observedAttributes() {
-    return ['notes'];
+    return ["notes"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'notes') {
+    if (name === "notes") {
       this.notes = JSON.parse(newValue);
       this.render();
     }
@@ -24,9 +24,10 @@ class NoteList extends HTMLElement {
   async connectedCallback() {
     try {
       this.notes = await NoteApi.getNotes();
+      console.log("Notes received:", this.notes);
       this.render();
     } catch (error) {
-      console.error('Failed to load notes:', error);
+      console.error("Failed to load notes:", error);
       this.notes = [];
       this.render();
     }
@@ -42,7 +43,7 @@ class NoteList extends HTMLElement {
             padding: 2rem;
           }
         </style>
-        <slot name="empty"></slot>
+        <slot name="empty">Kosong</slot>
       `;
     } else {
       this.shadowRoot.innerHTML = `
@@ -53,7 +54,9 @@ class NoteList extends HTMLElement {
             gap: inherit;
           }
         </style>
-        ${this.notes.map(note => `
+        ${this.notes
+          .map(
+            (note) => `
           <note-item 
             note-id="${note.id}"
             note-title="${note.title.replace(/"/g, '"')}"
@@ -61,10 +64,12 @@ class NoteList extends HTMLElement {
             created-at="${note.createdAt}"
           >
           </note-item>
-        `).join('')}
+        `,
+          )
+          .join("")}
       `;
     }
   }
 }
 
-customElements.define('note-list', NoteList);
+customElements.define("note-list", NoteList);

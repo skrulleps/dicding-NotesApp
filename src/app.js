@@ -1,12 +1,10 @@
+import "./script/components/index.js";
+import "./styles/style.css";
+import "./styles/note-styles.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "regenerator-runtime";
+import home from "./script/views/home.js";
 
-import './script/components/index.js';
-import './styles/style.css';
-import './styles/note-styles.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'regenerator-runtime';
-import home from './script/views/home.js';
-
-// Initialize app
-document.addEventListener('DOMContentLoaded', () => {
-    home();
+document.addEventListener("DOMContentLoaded", () => {
+  home();
 });

@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,html}\"",
     "start-dev": "webpack serve --config webpack.dev.js --mode development",
     "build": "webpack --config webpack.prod.js --mode production"
   },
@@ -17,6 +18,7 @@
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.3",
+    "prettier": "^3.5.3",
     "style-loader": "^4.0.0",
     "webpack": "^5.99.5",
     "webpack-cli": "^6.0.1",
